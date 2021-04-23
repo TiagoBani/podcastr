@@ -1,33 +1,38 @@
-import { GetStaticProps } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useContext } from 'react'
 
-import { format, parseISO } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
+import { GetStaticProps } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
 
-import { api } from '../services/api';
-import { convertDurationToTimeString } from '../utils/convertDurationToTimeString';
+import { format, parseISO } from 'date-fns'
+import ptBR from 'date-fns/locale/pt-BR'
 
-import styles from './home.module.scss';
+import { PlayerContext } from '../contexts/PlayerContext'
+import { api } from '../services/api'
+import { convertDurationToTimeString } from '../utils/convertDurationToTimeString'
+
+import styles from './home.module.scss'
 
 type Episode = {
-	id: string;
-	title: string;
-	thumbnail: string;
-	members: string;
-	publishedAt: string;
-	duration: number;
-	durationAsString: string;
-	description: string;
-	url: string;
-};
+	id: string
+	title: string
+	thumbnail: string
+	members: string
+	publishedAt: string
+	duration: number
+	durationAsString: string
+	description: string
+	url: string
+}
 
 type HomeProps = {
-	allEpisodes: Episode[];
-	latestEpisodes: Episode[];
-};
+	allEpisodes: Episode[]
+	latestEpisodes: Episode[]
+}
 
 export default function Home({ allEpisodes, latestEpisodes }: HomeProps) {
+	const { play } = useContext(PlayerContext)
+
 	return (
 		<div className={styles.homepage}>
 			<section className={styles.latestEpisodes}>
@@ -43,7 +48,7 @@ export default function Home({ allEpisodes, latestEpisodes }: HomeProps) {
 										height={192}
 										src={episode.thumbnail}
 										alt={episode.title}
-										objectFit="cover"
+										objectFit='cover'
 									/>
 
 									<div className={styles.episodesDetails}>
@@ -55,11 +60,11 @@ export default function Home({ allEpisodes, latestEpisodes }: HomeProps) {
 										<span>{episode.durationAsString}</span>
 									</div>
 
-									<button type="button">
-										<img src="/play-green.svg" alt="Tocar episódio" />
+									<button type='button' onClick={() => play(episode)}>
+										<img src='/play-green.svg' alt='Tocar episódio' />
 									</button>
 								</li>
-							);
+							)
 						})}
 				</ul>
 			</section>
@@ -88,7 +93,7 @@ export default function Home({ allEpisodes, latestEpisodes }: HomeProps) {
 												height={120}
 												src={episode.thumbnail}
 												alt={episode.title}
-												objectFit="cover"
+												objectFit='cover'
 											/>
 										</td>
 										<td>
@@ -100,18 +105,18 @@ export default function Home({ allEpisodes, latestEpisodes }: HomeProps) {
 										<td style={{ width: 100 }}>{episode.publishedAt}</td>
 										<td>{episode.durationAsString}</td>
 										<td>
-											<button type="button">
-												<img src="/play-green.svg" alt="Tocar episódio" />
+											<button type='button'>
+												<img src='/play-green.svg' alt='Tocar episódio' />
 											</button>
 										</td>
 									</tr>
-								);
+								)
 							})}
 					</tbody>
 				</table>
 			</section>
 		</div>
-	);
+	)
 }
 //SSG
 export const getStaticProps: GetStaticProps = async () => {
@@ -121,7 +126,7 @@ export const getStaticProps: GetStaticProps = async () => {
 			_sort: 'published_at',
 			_order: 'desc',
 		},
-	});
+	})
 
 	const episodes = data.map((episode) => ({
 		id: episode.id,
@@ -137,10 +142,10 @@ export const getStaticProps: GetStaticProps = async () => {
 		),
 		description: episode.description,
 		url: episode.file.url,
-	}));
+	}))
 
-	const latestEpisodes = episodes.slice(0, 2);
-	const allEpisodes = episodes.slice(2, episodes.length);
+	const latestEpisodes = episodes.slice(0, 2)
+	const allEpisodes = episodes.slice(2, episodes.length)
 
 	return {
 		props: {
@@ -148,5 +153,5 @@ export const getStaticProps: GetStaticProps = async () => {
 			allEpisodes,
 		},
 		revalidate: 60 * 60 * 8, // 8 hours
-	};
-};
+	}
+}
